@@ -1,4 +1,4 @@
-import Conv from './conv/index'
+const Conv = require('./conv/index')
 
 const Converter = new Conv()
-export default Converter
+module.exports = Converter

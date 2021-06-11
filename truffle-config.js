@@ -1,13 +1,17 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-require('dotenv').config()
 
 module.exports = {
  networks: {
+  development:{
+    host: '127.0.0.1',
+    port: 8545,
+    network_id: '*' // match any netwrok id
+  },
    rinkeby: {
      provider: function() {
        return new HDWalletProvider(
-         process.env.MNEMONIC,
-         process.env.RPC_URL
+        "guard weird moral task muffin hen mesh anchor pen warfare ladder hazard",
+         "https://rinkeby.infura.io/v3/a1800fa1e11c43b1ad4d0cb4552d0e4b"
        );
      },
      network_id: 4,

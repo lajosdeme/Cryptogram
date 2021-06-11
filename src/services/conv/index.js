@@ -1,11 +1,10 @@
-import bs58 from 'bs58'
+const bs58 = require('bs58')
 
-export default class Conv {
+class Conv {
     constructor() {
         this.main = {
             base58ToMultihash: (str) => {
                 const decoded = bs58.decode(str)
-                console.log(decoded)
                 return{
                     digest:`0x${decoded.slice(2).toString('hex')}`,
                     hashFunction: decoded[0],
@@ -31,3 +30,4 @@ export default class Conv {
         }
     }
 }
+module.exports = Conv

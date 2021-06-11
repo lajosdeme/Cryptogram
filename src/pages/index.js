@@ -20,7 +20,7 @@ export default class HomePage extends Component {
     }
     componentDidMount() {
         const contractAddress = process.env.CONTRACT_ADDR
-console.log(process.env.INFURA_WEBSOCKET_URL)
+
         window.ethereum.request({ method: "eth_requestAccounts" });
         const web3 = new Web3(window.ethereum);
         const web3socket = new Web3(new Web3.providers.WebsocketProvider(process.env.INFURA_WEBSOCKET_URL))
