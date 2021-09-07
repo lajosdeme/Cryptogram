@@ -6,11 +6,6 @@ import "@chainlink/contracts/src/v0.6/ChainlinkClient.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-//Use these imports instead if testing in Remix:
-//import "https://raw.githubusercontent.com/smartcontractkit/chainlink/master/evm-contracts/src/v0.6/ChainlinkClient.sol";
-//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v3.4/contracts/token/ERC721/ERC721.sol";
-//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v3.4/contracts/utils/Counters.sol";
-
 contract Cryptogram is ChainlinkClient, ERC721 {
     /* This is used to store the IPFS CID. 
     It is a multihash (https://github.com/multiformats/multihash), consisting of a digest, hash function used and size.
@@ -34,10 +29,10 @@ contract Cryptogram is ChainlinkClient, ERC721 {
 
     /* This will store the current multihash */
     Multihash private multihash;
-    
+
     /* Stores all multihashes */
-    mapping (uint256 => Multihash) private _multihashes;
-    
+    mapping(uint256 => Multihash) private _multihashes;
+
     /* Network: Rinkeby
     Oracle: address of the oracle that hosts the job
     JobId: id of the job
@@ -46,50 +41,60 @@ contract Cryptogram is ChainlinkClient, ERC721 {
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
-    
+
     /* Used for incrementing token ids after token issuance */
     /* Store the digest to ensure token hasn't been created with this hash before */
     using Counters for Counters.Counter;
-        Counters.Counter private _tokenIds;
+    Counters.Counter private _tokenIds;
     mapping(bytes32 => uint8) hashes;
 
     //Event logs creation of NFT
     event NFTCreated();
-        
+
     /* Set NFT name & symbol, set up chainlink client */
     constructor() public ERC721("Cryptogram", "CG") {
         setPublicChainlinkToken();
         oracle = ORACLE_ADDRESS;
         jobId = JOB_ID;
-        fee = 1 * 10 ** 18; // 1 LINK
+        fee = 1 * 10**18; // 1 LINK
     }
-    
+
     /* Makes a request to the oracle, which gets the picture from instagram and uploads it to IPFS.
     @param {string} endpoint the id of the picture on Instagram
     (i.e. for https://instagram.com/p/CPtoYAMj526 the endpoint is CPtoYAMj526)
      */
-    function saveIgImgToIpfs(string memory endpoint) public returns (bytes32 requestId) {
-        Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
+    function saveIgImgToIpfs(string memory endpoint)
+        public
+        returns (bytes32 requestId)
+    {
+        Chainlink.Request memory request = buildChainlinkRequest(
+            jobId,
+            address(this),
+            this.fulfill.selector
+        );
         request.add("endpoint", endpoint);
         request.add("copyPath", "result");
         return sendChainlinkRequestTo(oracle, request, fee);
     }
-    
+
     /* Response received from oracle
     Creates a multihash and then uses that to create the NFT
      */
-    function fulfill(bytes32 _requestId, bytes32 _hash) public recordChainlinkFulfillment(_requestId) {
+    function fulfill(bytes32 _requestId, bytes32 _hash)
+        public
+        recordChainlinkFulfillment(_requestId)
+    {
         multihash = Multihash(_hash, defHashFunc, defSize);
         createCG(multihash);
         emit NFTCreated();
     }
-    
+
     /* Creates a Cryptogram token:
     Checks if the hash hasn't been used to mint a token before
     Increments the token id
     Mints the new token and adds the multihash to the multihashes
      */
-    function createCG(Multihash memory hash) public returns(uint256) {
+    function createCG(Multihash memory hash) public returns (uint256) {
         require(hashes[hash.digest] != 1);
         hashes[hash.digest] = 1;
 
@@ -99,11 +104,15 @@ contract Cryptogram is ChainlinkClient, ERC721 {
         _multihashes[newItemId] = hash;
         return newItemId;
     }
-    
+
     /* Get the multihash by the token id
     Front-end can use this to reconstruct the IPFS hash and get the image
      */
-    function getMultihashByTokenId(uint256 tokenId) public view returns (Multihash memory) {
+    function getMultihashByTokenId(uint256 tokenId)
+        public
+        view
+        returns (Multihash memory)
+    {
         return _multihashes[tokenId];
     }
 }
