@@ -24,8 +24,8 @@ contract Cryptogram is ChainlinkClient, ERC721 {
         bytes1 size;
     }
 
-    bytes1 defHashFunc = 0x12;
-    bytes1 defSize = 0x20;
+    bytes1 constant defHashFunc = 0x12;
+    bytes1 constant defSize = 0x20;
 
     /* This will store the current multihash */
     Multihash private multihash;
